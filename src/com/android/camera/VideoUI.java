@@ -19,6 +19,7 @@ package com.android.camera;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
+import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -246,7 +247,17 @@ public class VideoUI implements PreviewStatusListener {
      * @return The size of the available preview area.
      */
     public Point getPreviewScreenSize() {
-        return new Point(mRootView.getMeasuredWidth(), mRootView.getMeasuredHeight());
+        if (mRootView.getMeasuredWidth() > 0 && mRootView.getMeasuredHeight() > 0) {
+            return new Point(mRootView.getMeasuredWidth(), mRootView.getMeasuredHeight());
+	} else {
+	    // Measured width and height are not yet available - use screen size
+	    // as a proxy, should be fine given camera typically is full screen anyhow.
+	    DisplayMetrics metrics = new DisplayMetrics();
+	    mActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+	    Log.i(TAG, "Measured width and height are not yet available, reverting " +
+	            "to display size: " + metrics.widthPixels + ", " + metrics.heightPixels);
+	    return new Point(metrics.widthPixels, metrics.heightPixels);
+	}
     }
 
     /**
